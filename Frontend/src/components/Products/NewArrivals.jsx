@@ -187,7 +187,7 @@ const NewArrivals = () => {
                 <div key={product._id} className='min-w-[100%] sm:min-w-[100%] md:min-w-[50%] lg:min-w-[30%] relative'>
                 <img src={product.images[0]?.url} alt={product.images[0]?.altText || product.name} className='w-full h-[400px] object-cover rounded-lg' draggable='false' />
                 <div className='absolute bottom-0 left-0 right-0 bg-opacity-50 backdrop-blur-md text-white p-4 rounded-b-lg '> 
-                    <Link to={`product/${product._id}`} className='block'>
+                    <Link to={`products/${product._id}`} className='block'>
                     <h4 className='font-medium'>{product.name}</h4>
                     <p className='mt-1'>${product.price}</p>
                     </Link>
