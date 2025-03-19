@@ -24,6 +24,10 @@ const Navbar = () => {
     setNavbarDrawerOpen(!navbarDrawerOpen);
   };
 
+  const closeNavDrawer = () => {
+    setNavbarDrawerOpen(false);
+  };
+
   const toggleCartDrawer = () => {
     setDrawerOpen(!drawerOpen);
   };
@@ -65,9 +69,14 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center space-x-4">
-            {user && user.role == "admin" && ( <Link to="/admin" className="block bg-black px-2 rounded text-sm text-white">
-            Admin
-          </Link>)}
+          {user && user.role === "admin" && (
+            <Link
+              to="/admin"
+              className="block bg-black px-2 rounded text-sm text-white"
+            >
+              Admin
+            </Link>
+          )}
           <Link to="/profile" className="hover:text-black">
             <HiOutlineUser className="h-6 w-6 text-gray-700" />
           </Link>
@@ -93,6 +102,42 @@ const Navbar = () => {
           </button>
         </div>
       </nav>
+
+      {/* Overlay when drawer is open */}
+      {navbarDrawerOpen && (
+        <div
+          className="fixed inset-0  bg-opacity-50 transition-opacity duration-300 z-40"
+          onClick={closeNavDrawer}
+        />
+      )}
+
+      {/* Mobile Navigation Drawer (Slides from Left) */}
+      <div
+        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform ${
+          navbarDrawerOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 ease-in-out z-50`}
+      >
+       <div className="flex justify-end p-4">
+  <button onClick={closeNavDrawer}>
+    <IoMdClose className="h-6 w-6 text-gray-700" />
+  </button>
+</div>
+
+        <nav className="flex flex-col space-y-4 p-6">
+          <Link to="/collections/all?gender=Men" className="text-gray-700">
+            Men
+          </Link>
+          <Link to="/collections/all?gender=Women" className="text-gray-700">
+            Women
+          </Link>
+          <Link to="/collections/all?category=Top Wear" className="text-gray-700">
+            Top Wear
+          </Link>
+          <Link to="/collections/all?category=Bottom Wear" className="text-gray-700">
+            Bottom Wear
+          </Link>
+        </nav>
+      </div>
 
       <CartDrawer drawerOpen={drawerOpen} toggleCartDrawer={toggleCartDrawer} />
     </>
