@@ -1,26 +1,65 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import CartContents from "../Cart/CartContents";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchCart, updateCartItemQuantity } from "../../redux/slices/cartSlice";
 
 const CartDrawer = ({ drawerOpen, toggleCartDrawer }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user, guestId } = useSelector((state) => state.auth);
+  const { cart, loading, error } = useSelector((state) => state.cart);
+  const [localCart, setLocalCart] = useState(cart);
+
+  const userId = user ? user._id : null;
   const location = useLocation();
   const drawerRef = useRef(null);
 
-  // Function to clear the cart (mock implementation)
+  useEffect(() => {
+    if (userId || guestId) {
+      dispatch(fetchCart({ userId, guestId }));
+    }
+  }, [dispatch, userId, guestId]);
+
+  useEffect(() => {
+    setLocalCart(cart);
+  }, [cart]);
+
+  useEffect(() => {
+    if (error) {
+      console.error("Error fetching cart:", error);
+    }
+  }, [error]);
+
   const clearCart = () => {
-    localStorage.removeItem("cartItems"); // Remove stored cart items
+    localStorage.removeItem("cart");
     console.log("Cart cleared!");
   };
 
   const handleCheckout = () => {
     clearCart();
-    toggleCartDrawer(); // Close drawer
-    navigate("/checkout");
+    toggleCartDrawer();
+    if (!user) {
+      navigate("/login?redirect=checkout");
+    } else {
+      navigate("/checkout");
+    }
   };
 
-  // Close drawer when clicking outside
+  const handleQuantityChange = (productId, quantity, size, color) => {
+    const updatedCart = {
+      ...localCart,
+      products: localCart.products.map((item) =>
+        item.productId === productId && item.size === size && item.color === color
+          ? { ...item, quantity }
+          : item
+      ),
+    };
+    setLocalCart(updatedCart);
+    dispatch(updateCartItemQuantity({ productId, quantity, guestId, userId, size, color }));
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (drawerRef.current && !drawerRef.current.contains(event.target)) {
@@ -35,12 +74,11 @@ const CartDrawer = ({ drawerOpen, toggleCartDrawer }) => {
     };
   }, [drawerOpen]);
 
-  // Close drawer when navigating to another page
   useEffect(() => {
     if (drawerOpen) {
       toggleCartDrawer();
     }
-  }, [location.pathname]); // Detect route change
+  }, [location.pathname]);
 
   return (
     <div
@@ -57,20 +95,34 @@ const CartDrawer = ({ drawerOpen, toggleCartDrawer }) => {
 
       <div className="flex-grow overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Your Cart</h2>
-        <CartContents />
+        {loading ? (
+          <p>Loading...</p>
+        ) : localCart && localCart.products && localCart.products.length > 0 ? (
+          <CartContents
+            cart={localCart}
+            userId={userId}
+            guestId={guestId}
+            onQuantityChange={handleQuantityChange}
+          />
+        ) : (
+          <p>Your cart is empty.</p>
+        )}
       </div>
 
-      {/* Checkout Button */}
       <div className="p-4 bg-white sticky bottom-0">
-        <button
-          onClick={handleCheckout}
-          className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
-        >
-          Checkout
-        </button>
-        <p className="text-sm tracking-tighter text-gray-500 text-center">
-          Shipping, taxes, and discount codes calculated at checkout
-        </p>
+        {localCart && localCart?.products && localCart.products.length > 0 && (
+          <>
+            <button
+              onClick={handleCheckout}
+              className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition"
+            >
+              Checkout
+            </button>
+            <p className="text-sm tracking-tighter text-gray-500 text-center">
+              Shipping, taxes, and discount codes calculated at checkout
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

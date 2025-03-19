@@ -22,6 +22,11 @@ const cart = {
   totalPrice: 195,
 };
 
+// Function to generate Easypaisa payment link
+const generateEasypaisaPaymentLink = (phoneNumber, amount) => {
+  return `https://easypaisa.com.pk/pay?phone=${phoneNumber}&amount=${amount}`;
+};
+
 const Checkout = () => {
   const navigate = useNavigate();
   const [checkoutId, setCheckoutId] = useState(null);
@@ -34,6 +39,12 @@ const Checkout = () => {
     country: "",
     phone: "",
   });
+
+  const phoneNumber = "03406218617"; // Your Easypaisa number
+  const paymentLink = generateEasypaisaPaymentLink(
+    phoneNumber,
+    cart.totalPrice
+  );
 
   const handleCreateCheckout = (e) => {
     e.preventDefault();
@@ -183,13 +194,25 @@ const Checkout = () => {
                 Checkout
               </button>
             ) : (
-              <div>
-                <h3 className="text-lg mb-4 text-center">Pay with SadaPay</h3>
-                <SadapayButton
-                  amount={cart.totalPrice}
-                  onSuccess={handlePaymentSuccess}
-                  onError={(err) => alert("Payment failed. Try again.")}
-                />
+              <div className="text-center">
+                <h3 className="text-lg mb-4">Complete Your Payment</h3>
+                {/* Easypaisa Payment Button */}
+                <a
+                  href={paymentLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-green-500 text-white py-3 rounded w-full block text-center mb-4"
+                >
+                  Pay with Easypaisa
+                </a>
+               
+                <button
+                  onClick={handlePaymentSuccess}
+                   className="bg-orange-500 text-white py-3 rounded w-full block
+                text-center mb-4"
+                >
+                  I have paid
+                </button>
               </div>
             )}
           </div>
@@ -217,10 +240,6 @@ const Checkout = () => {
             <p className="font-semibold">${product.price}</p>
           </div>
         ))}
-        <div className="flex justify-between items-center text-lg mt-3 font-semibold">
-            <p>Shipping</p>
-            <p>Free</p>
-        </div>
         <div className="flex justify-between font-semibold items-center text-lg mt-4 border-t pt-4">
           <span>Total:</span>
           <span>${cart.totalPrice}</span>
