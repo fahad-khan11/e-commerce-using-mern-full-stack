@@ -48,3 +48,4 @@ dist-ssr
 .vercel
 
 config.bat
+.vscode/*
